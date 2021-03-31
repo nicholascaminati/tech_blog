@@ -1,0 +1,169 @@
+Symfony guida
+
+Symfony è un framework mvc minamal, per poter utlilizzare i comandi da console per creare controller e modelli da linea di comandoè necessario installare un bundle.
+composer create-project symfony/website-skeleton:"^4.4" my_project_name
+composer require make
+composer require doctrine/annotations
+
+Creare un controller:
+php bin/console make:controller MainController
+
+Debuggare tramite la bar
+ composer require profiler --dev
+
+Creare un istanza del web-server:
+ composer require symfony/web-server-bundle --dev
+ php bin/console server:start
+ 
+Scaricare twig:
+composer require template
+
+Scaricare doctrine
+composer require doctrine
+
+Creare un database con doctrine.
+php bin/console doctrine:database:create
+
+Creare un'entità con doctrine:
+php bin/console make:entity
+
+Aggiungere un'entita a db con doctrine
+
+		$post = new Post();
+        $post->setTitle('titolo di prova');
+        $post->setBody('corpo di prova');
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist();
+        $em->flush();
+
+Cosa è un repository?
+In symfony un repository serve per poter fare delle query su un entità.
+
+Installare gli asset:
+composer require symfony/asset
+
+Per creare l'autenticazione è necessario installare security
+composer require security
+
+Creiamo l'entità User
+
+php bin/console make:user
+
+Successivamente è possibile utilizzare l'autenticazione già preesistente
+php bin/console make:auth
+
+Cosa sono i services?
+I services sono il cuore di symfony. Tutti in symfony è un service (un oggetto) e questi combinati insieme fanno tutto il lavoro.
+Per esempio c'è l'oggetto route, l'oggetto logger e cosi via.
+
+Relazione con doctrine
+/**
+ * @ManyToOne(targetEntity="Your\NameSpace\Entity\User")
+ * @JoinColumn(name="user_id", referencedColumnName="id")
+ **/
+    private $user;
+	
+Come utilizzare i form in symfony
+Symfony ci da la possibilità di utilizzare i form, per poterli utilizzare è necessario:
+composer require form validation
+php bin/console make:form 
+
+Form "normali" in symfony
+Per poter utilizzare i form normalmente è necessario effettuare qualche modifica.
+Per validare i form è necessario acceder all'entity (per esempio post) ed importare:
+use Symfony\Component\Validator\Constraints as Assert;
+Ora possiamo gestire la validazione tramite le annotations
+@Assert\NotBlank
+
+Inerire create_at updated_at
+Per inserire dei valori di tipo created_At updated_at è importante aggiungere nell'entità:
+@ORM\HasLifecycleCallbacks
+ public function onPrePersist()
+    {
+        $this->setCreatedAt(new \DateTime("now"));
+        $this->setUpdatedAt(new \DateTime("now"));
+    }
+
+    /**
+     * Gets triggered every time on update
+     * @ORM\PreUpdate
+     */
+    public function onPreUpdate()
+    {
+        $this->setUpdatedAt(new \DateTime("now"));
+    }
+
+Effettuare la migration al db senza utilizzare make:migration
+php bin/console doctrine schema:update --dump-sql
+php bin/console doctrine schema:update --force
+
+Creare un utente con form formbuilder
+ $form = $this->createFormBuilder()->add('username')
+                                            ->add('email')
+                                            ->add('password',RepeatedType::class,[
+                                                'type' => PasswordType::class,
+                                                'required' => true,
+                                                'first_options'  => ['label' => 'Password'],
+                                                'second_options' => ['label' => 'Repeat Password'],
+                                            ])
+                                            ->add('register',SubmitType::class,['attr' =>['class' => 'btn btn-success float-right']])
+                                            ->getForm();
+        return $this->render('register/index.html.twig', [
+            'form' => $form->createView()
+        ]);
+
+Quando si crea un utente siccome la password deve essere criptata è importante utilizzare: UserPasswordEncoderInterface	
+
+Una volta effettuato tutto bisogna andare in Security/CustomAuthenticator ed impostare dove vogliamo il redirect.
+
+Controllare se uno user è loggato o meno:
+{% if app.user %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
+						</li>
+						{% else %}
+							<li class="nav-item">
+							<a class="nav-link" href="{{path('app_login')}}">Login</a>
+						</li>
+						{% endif %}
+						
+Una volta creata l'autenticazione è necessario impostare l'accesso alla rotta di login solo se l'utente non è già loggato.
+Per fare questo andiamo a modificare il file di configurazione security.yaml.
+
+Modificare un'entità.
+se vogliamo modificare un'entità (per esempio vogliamo aggiunger un immagine ai nostri post) possiamo modificare l'entità aggiungendo il campo desiderato
+e successivamente rigenerare le entità (verrano ricreati getter and setter senza doverlo rifare manualmente).
+php bin/console make:entity --regenerate
+
+Fare l'upload di un file.
+
+Per poter fare l'upload del file è consigliabile creare un service da poter richiamare ogni volta che si vuole senza fare "ingrossare" troppo il controller, vedi:
+https://symfony.com/doc/4.4/controller/upload_file.html, inoltre se l'immagine non deve essere obbligatoria e quindi può essere nullable è necessario:
+   * @ORM\Column(type="string",length=100,nullable=true)
+   
+Doctrine relationships
+One to many
+Nel nostro caso avremo una relazione One to many in quanto ogni post potrà avere solo una categoria associata ma ogni categoria potrà essere utilizzata da più post.
+Per fare questo dobbiamo inserire nelle entità delle annotations.
+Nei post inseriremo:
+ /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Category",inversedBy="post")
+     * 
+     */
+    private $category;
+	
+Mentre nelle categorie:
+/**
+     * @ORM\OneToMany(targetEntity="App\Entity\Post", mappedBy="category")
+     * 
+     */
+    private $post;
+	
+Una volta inserite le istruzioni dobbiamo andare a rigenerare le entità:
+php bin/console make:entity --regenerate
+
+Creare un comando con symfony
+Per creare un comando con symfony è sufficiente php bin/console make:command
+
+
