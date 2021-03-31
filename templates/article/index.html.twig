@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Elenco dei post{% endblock %}
+
+{% block body %}
+<!-- header -->
+    <header class="masthead" style="background-image: url('../img/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="site-heading">
+            <h1>Clean Blog</h1>
+            <span class="subheading">A Blog Theme by Start Bootstrap</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!--fine header -->
+  <!-- Post -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+      {% for post in posts %}
+        <div class="post-preview">
+          <a href="post.html">
+            <h2 class="post-title">
+              {{post.title}}
+            </h2>
+            <h3 class="post-subtitle">
+             {{post.body}}
+            </h3>
+          </a>
+          <p class="post-meta">Posted by
+            <a href="#">Start Bootstrap</a>
+            on September 24, 2019</p>
+        </div>
+        <hr>
+       {% endfor %}
+       
+      
+        <!-- Pager 
+        <div class="clearfix">
+          <a class="btn btn-primary float-right" href="#">Older Posts &rarr;</a>
+        </div>
+        -->
+      </div>
+    </div>
+  </div>
+{% endblock %}
