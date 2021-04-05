@@ -87,4 +87,25 @@ class ArticleController extends AbstractController
         $em->flush();
         return  $this->redirect($this->generateUrl('home'));
     }
+    /**
+     * @Route("/export/csv", name="export-csv")
+     */
+    public function exportCSV()
+    {
+        $arrayProva = ['ciao', 'miao', 'bao', 'not defined', 'rosso'];
+    
+        $fp = fopen('php://temp', 'w');
+        foreach ($arrayProva as $fields) {
+            fputcsv($fp, explode(",", $fields));
+        }
+
+        rewind($fp);
+        $response = new Response(stream_get_contents($fp));
+        fclose($fp);
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="barcode.csv"');
+
+        return $response;
+    }
 }
