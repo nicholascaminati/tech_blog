@@ -24,18 +24,18 @@
       <div class="col-lg-8 col-md-10 mx-auto">
       {% for post in posts %}
         <div class="post-preview">
-          <a href="post.html">
+          <a href="{{path('post.show',{'id':post.id})}}">
             <h2 class="post-title">
               {{post.title}}
             </h2>
             <h3 class="post-subtitle">
-             {{post.body}}
+             {{ post.body|raw|striptags|slice(0, 200) }}...
             </h3>
           </a>
-          <p class="post-meta">Posted by
-            <a href="#">Start Bootstrap</a>
-            on September 24, 2019</p>
-        </div>
+          <p class="post-meta">
+           Scritto il {{ post.updatedAt|date("m/d/Y") }} da <a href="#">  {{post.user.nickname}}</a>
+          </p>
+        </div> 
         <hr>
        {% endfor %}
        

@@ -27,11 +27,13 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * @Route("/post/{slug}", name="post.show",methods={"GET"})
+     * @Route("/post/{id}", name="post.show",methods={"GET"})
      */
-    public function show($slug)
+    public function show($id, PostRepository $postRepository)
     {
-        return $this->render('article/show.html.twig', []);
+        $post = $postRepository->find($id);
+        return $this->render('article/show.html.twig', 
+        ['post' => $post]);
     }
     /**
      * @Route("/post/create/article", name="post.create")
@@ -90,7 +92,7 @@ class ArticleController extends AbstractController
     /**
      * @Route("/export/csv", name="export-csv")
      */
-    public function exportCSV()
+   /* public function exportCSV()
     {
         $arrayProva = ['ciao', 'miao', 'bao', 'not defined', 'rosso'];
     
@@ -107,5 +109,13 @@ class ArticleController extends AbstractController
         $response->headers->set('Content-Disposition', 'attachment; filename="barcode.csv"');
 
         return $response;
+    }*/
+
+/**
+     * @Route("/chart", name="chart", methods={"get"})
+     * @param Request $request
+     */
+    public function chartJs(){
+        return $this->render('chart/index.html.twig');
     }
 }
